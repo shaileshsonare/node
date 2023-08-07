@@ -1,39 +1,22 @@
-var express = require("express");
-var app = express();
-app.get("/", (req, res) => {
-res.send("Home Page");
+'use strict';
+const express = require('express');
+const path = require('path');
+const serverless = require('serverless-http');
+const app = express();
+const bodyParser = require('body-parser');
+
+const router = express.Router();
+router.get('/', (req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/html' });
+  res.write('<h1>Hello from Express.js!</h1>');
+  res.end();
 });
-app.get("/student", (req, res) => {
-data = { result: "Student GET Request" };
-res.send(data);
-});
-app.post("/student", (req, res) => {
-data = { result: "Student post Request" };
-res.send(data);
-});
-app.put("/student", (req, res) => {
-data = { result: "Student put Request" };
-res.send(data);
-});
-app.delete("/student", (req, res) => {
-data = { result: "Student delete Request" };
-res.send(data);
-});
-app
-.route("/teacher")
-.get((req, res) => {
-data = { result: "Teacher get Request" };
-res.send(data);
-})
-.post((req, res) => {
-data = { result: "Teacher post Request" };
-res.send(data);
-})
-.put((req, res) => {
-data = { result: "Teacher put Request" };
-res.send(data);
-})
-.delete((req, res) => {
-data = { result: "Teacher delete Request" };
-res.send(data);
-});
+router.get('/another', (req, res) => res.json({ route: req.originalUrl }));
+router.post('/', (req, res) => res.json({ postBody: req.body }));
+
+app.use(bodyParser.json());
+app.use('/.netlify/functions/server', router);  // path must route to lambda
+app.use('/', (req, res) => res.sendFile(path.join(__dirname, '../index.html')));
+
+module.exports = app;
+module.exports.handler = serverless(app);
